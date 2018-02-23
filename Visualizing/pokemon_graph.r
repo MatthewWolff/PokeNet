@@ -1,5 +1,6 @@
-library(dplyr)
 library(ggplot2)
+library(tidyverse)
+library(dplyr)
 
 battles <- read.csv("~/Downloads/pokemon-combat/combats.csv")
 tests <- read.csv("~/Downloads/pokemon-combat/tests.csv")
@@ -18,9 +19,13 @@ poke_graph <- pokemon %>%
          Sp.Atk = Sp..Atk,
          Sp.Def = Sp..Def,
          Gen = Generation) %>%
-  mutate(Power = pmax(Attack, Sp.Atk)) %>% # Judge by their best offensive stat
-  mutate(Type = factor(Type, levels = types, ordered = TRUE)) %>% # refactor for coloring
-  mutate(Legendary = as.logical(Legendary)) %>% # convert to real booleans
+  mutate(Power = pmax(Attack, Sp.Atk), # you can choose your stronger stat
+         Resilience = (Defense + Sp.Def)/2, # it's probably 50/50 what they'll attack with
+         Value = Power + Resilience) %>%
+  mutate() %>% # refactor for coloring
+  mutate(Legendary = as.logical(Legendary), # convert to real booleans
+         Gen = factor(Gen), # refactor for coloring
+         Type = factor(Type, levels = types, ordered = TRUE)) %>% 
   filter(!is.na(Type)) # remove duplicates that don't have a secondary type
 
 ggplot(data=poke_graph, mapping = aes(Type, Power, fill=Type)) + 
@@ -32,3 +37,14 @@ ggplot(data=poke_graph, mapping = aes(Type, Power, fill=Type)) +
   scale_fill_manual(values=colors) +
   guides(fill=FALSE) + # remove legend for fill
   coord_polar()
+
+ggplot(data = poke_graph %>%
+         select(c(Gen, Value, Legendary)) %>%
+         group_by(Gen, Legendary) %>%
+         summarize(Value = mean(Value))) + 
+  geom_bar(mapping = aes(Gen, Value, fill=Gen), col = "black", stat = "identity") + 
+  facet_wrap(~ Legendary, 
+             labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
+  ggtitle("Overall Value of Pokémon across generations") + 
+  labs(x="Generation", y="Overall Value (Offensive + Defenseive)")
+
