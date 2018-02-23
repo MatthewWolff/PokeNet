@@ -159,5 +159,6 @@ nn <- parLapply(cl, seq(5000, 5000, by=1000),
 valid_net <-  13
 invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
 stopCluster(cl)
-saveRDS(nn, paste0(output, "neural_nets.rds"))
+save(nn, file=paste0(output, "neural_nets.rds"))
 # load(paste0(output, "neural_nets.rds"))
+# dput(nn, "~/Projects/Pokemon/neural_net_object.r")
