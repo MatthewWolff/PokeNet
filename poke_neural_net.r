@@ -4,7 +4,7 @@ library(neuralnet)
 library(parallel)
 
 input <- "~/projects/pokemon/raw_data/"
-output <- "~/projects/pokemon/normalized/" # must end with a "/"
+output <- "~/projects/pokemon/" # must end with a "/"
 
 #####################################################################
 #' @param categorical a vector of categorical values that have levels
@@ -37,10 +37,10 @@ enumerate_categorical <- function(categorical){
 #####################################################################
 #' @param x the index within the metadata list of the list to be stored
 #' @return None
-store_metadata <- function(x) 
+store_metadata <- function(x)
   write.csv(
     t(as.data.frame(metalists[[x]])), 
-    paste0(output, names(metalists[x]),".csv"),
+    paste0(output,"normalized/", names(metalists[x]),".csv"),
     row.names = FALSE, na = "")
 
 #####################################################################
@@ -48,7 +48,8 @@ store_metadata <- function(x)
 #' @param metalists columns from the main list that are separate data.frames
 #' @return None
 store <- function(list, metalists){
-  write.csv(list, paste0(output,"main.csv"), row.names = FALSE)
+  dir.create(paste0(output,"normalized/"), showWarnings = FALSE)
+  write.csv(list, paste0(output,"normalized/","main.csv"), row.names = FALSE)
   invisible(lapply(1:length(metalists), store_metadata))
 }
 
@@ -137,7 +138,7 @@ pn <- pokemon %>%
 # determine which lists need to be separately stored
 lists <- pn[which(!sapply(pn, class) == "list")] 
 metalists <- pn[which(sapply(pn, class) == "list")]
-# store(lists, metalists)
+# store(lists, metalists) 
 
 set.seed(101)
 training_data <- read.csv(paste0(input,"combats.csv")) %>%
@@ -145,15 +146,18 @@ training_data <- read.csv(paste0(input,"combats.csv")) %>%
 
 # pull apart data into training and testing
 raw <- lists %>% select(-c(ID, Name))
-split = sample.split(training_data$Winner, SplitRatio = 0.90)
-train = subset(training_data, split == TRUE)
+split = sample.split(training_data$Winner, SplitRatio = 0.20) # only leaves 10,000 training recs
+train = subset(training_data, split == TRUE) # but we don't run more than 8,000 at a time, so
 test = subset(training_data, split == FALSE)
 
 # parallelize neural net generation
 no_cores <- detectCores() - 1
 cl <- makeCluster(no_cores, type="FORK")
-nn <- parLapply(cl, seq(1000, 2000, by=1000), 
+nn <- parLapply(cl, seq(5000, 5000, by=1000), 
                 function(x) generate_neural_net(train, x))
 # print results && kill cluster
-invisible(sapply(nn, test_neural_net))
+valid_net <-  13
+invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
 stopCluster(cl)
+saveRDS(nn, paste0(output, "neural_nets.rds"))
+# load(paste0(output, "neural_nets.rds"))
