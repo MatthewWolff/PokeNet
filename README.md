@@ -14,7 +14,7 @@ Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge
 After generally cleaning up the data to be properly formatted for R (e.g. turning "True" strings into TRUE booleans),
 I normalized all continuous data to Gaussian distributions. Categoricals as a whole presented a more
 difficult challenge. Dealing with binary variables was easy enough — I encoded independent binary variables
-as 1 and -1, and the dependent (the victor) as 0 and 1. The I used a different encoding approach between 
+as 1 and -1, and the dependent (the victor) as 0 and 1. I used a different encoding approach between 
 independent and dependent because [a resource](https://visualstudiomagazine.com/articles/2013/07/01/neural-network-data-normalization-and-encoding.aspx)
 indicated this was preferable. I attempted to use 1-of-(C-1) effects encoding for non-binary categorical variables,
 but after encoding them I was unable to use them as input, and thus chose to disregard them.  
