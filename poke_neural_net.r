@@ -151,14 +151,25 @@ train = subset(training_data, split == TRUE) # but we don't run more than 8,000 
 test = subset(training_data, split == FALSE)
 
 # parallelize neural net generation
-no_cores <- detectCores() - 1
-cl <- makeCluster(no_cores, type="FORK")
-nn <- parLapply(cl, seq(5000, 5000, by=1000), 
-                function(x) generate_neural_net(train, x))
-# print results && kill cluster
-valid_net <-  13
-invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
-stopCluster(cl)
-save(nn, file=paste0(output, "neural_nets.rds"))
-# load(paste0(output, "neural_nets.rds"))
-# dput(nn, "~/Projects/Pokemon/neural_net_object.r")
+# no_cores <- detectCores() - 1
+# cl <- makeCluster(no_cores, type="FORK")
+# nn <- parLapply(cl, seq(5000, 5000, by=1000), 
+#                 function(x) generate_neural_net(train, x))
+# # print results && kill cluster
+# valid_net <-  13
+# invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
+# stopCluster(cl)
+# save(nn, file=paste0(output, "neural_nets.rds")) # R object version
+# dput(nn, "~/Projects/Pokemon/neural_net_object.r") # text version
+                        
+# Train neural net
+nn <- generate_neural_net(train, sampling_size = 3000)
+
+# Generate results with it
+tests <- read.csv(paste0(input, "tests.csv"))
+tests <- make_battle(tests, "ALL")
+predicted <- compute(nn, tests)
+winners <-  sapply(predicted$net.result, round, digits=0) + 1 # turn into the index
+winning_pokemon <- as.data.frame(unlist(sapply(1:dim(tests)[1], function(x) tests[x,][winners[x]])))
+names(winning_pokemon) <- "Winner"
+write.csv(winning_pokemon, file=paste0(output, "winner.csv"))
