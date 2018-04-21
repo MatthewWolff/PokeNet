@@ -154,9 +154,9 @@ training_data <- read.csv(paste0(input,"combats.csv")) %>%
 
 # pull apart data into training and testing
 raw <- lists %>% select(-c(ID, Name))
-split = sample.split(training_data$Winner, SplitRatio = 0.20) # only leaves 10,000 training recs
-train = subset(training_data, split == TRUE) # but we don't run more than 8,000 at a time, so
-test = subset(training_data, split == FALSE)
+split <- sample.split(training_data$Winner, SplitRatio = 0.20) # only leaves 10,000 training recs
+train <- subset(training_data, split == TRUE) # but we don't run more than 8,000 at a time, so
+test <- subset(training_data, split == FALSE)
 
 # parallelize neural net generation
 # no_cores <- detectCores() - 1
@@ -165,6 +165,7 @@ test = subset(training_data, split == FALSE)
 #                 function(x) generate_neural_net(train, x))
 # # print results && kill cluster
 # valid_net <-  13
+## test the nets. if something screws up and it's invalid, toss it out ig lol
 # invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
 # stopCluster(cl)
 # save(nn, file=paste0(output, "neural_nets.rds")) # R object version
