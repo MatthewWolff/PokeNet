@@ -54,10 +54,13 @@ store <- function(list, metalists){
 }
 
 #####################################################################
+#' @param pairs accepts a list of pairs of pokemon IDs
+#' @param how_many how many of the pairs to expand 
+#' @return a large data frame containing the stats of the pair of pokemon
 make_battle <- function(pairs, how_many){
   if(how_many == "ALL")
     how_many = dim(pairs)[1]
-  battles <- lapply(1:how_many, function(x){ #dim(train)[1], function(x){
+  battles <- lapply(1:how_many, function(x){
     battle <- as.numeric(pairs[x,])
     p1 <- raw[battle[1],]
     p2 <- raw[battle[2],]
@@ -70,11 +73,16 @@ make_battle <- function(pairs, how_many){
   rownames(dat) <- NULL
   return(dat)
 }
+#' @param battles a dataframe of pokemon pair statistics
+#' @param how_many the number of winners to add as a column
+#' @return a new dataframe that has a winner column in front!
 add_winner <- function(battles, how_many){
   winners <- as.data.frame(unname(unlist(train[3])[1:how_many]))
   colnames(winners) <- c("Winner")
   cbind(winners, battles)
 }
+#' @param how_many the number of winners to check
+#' @return a vector of winner outcomes... i think. it's been a while since I wrote this
 check_winners <- function(how_many){
   return(unname(unlist(test[3])[1:how_many]))
 }
@@ -136,8 +144,8 @@ pn <- pokemon %>%
   mutate(Type2 = lapply(Type2, function(x) ifelse(!is.null(x), x, NA))) # NULL -> NA
 
 # determine which lists need to be separately stored
-lists <- pn[which(!sapply(pn, class) == "list")] 
-metalists <- pn[which(sapply(pn, class) == "list")]
+lists <- pn[which(!sapply(pn, class) == "list")] # this will grab the lists and ignore lists of lists (they're bad!)
+# metalists <- pn[which(sapply(pn, class) == "list")]
 # store(lists, metalists) 
 
 set.seed(101)
