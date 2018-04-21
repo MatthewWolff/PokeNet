@@ -154,9 +154,9 @@ training_data <- read.csv(paste0(input,"combats.csv")) %>%
 
 # pull apart data into training and testing
 raw <- lists %>% select(-c(ID, Name))
-split = sample.split(training_data$Winner, SplitRatio = 0.20) # only leaves 10,000 training recs
-train = subset(training_data, split == TRUE) # but we don't run more than 8,000 at a time, so
-test = subset(training_data, split == FALSE)
+split <- sample.split(training_data$Winner, SplitRatio = 0.20) # only leaves 10,000 training recs
+train <- subset(training_data, split == TRUE) # but we don't run more than 8,000 at a time, so
+test <- subset(training_data, split == FALSE)
 
 # parallelize neural net generation
 # no_cores <- detectCores() - 1
