@@ -99,6 +99,22 @@ test_neural_net <- function(nn){
   cat("Neural Net of training size",length(nn$response),"\n\tAccuracy: ", acc*100, "%\n")
 }
 #####################################################################
+#' @param sample_sizes_to_test a vector of sample sizes with which to train a neural network
+#' @return a series of neural nets, trained to the specified degrees
+parallel_train_nets <- function(sample_sizes_to_test) {
+  no_cores <- detectCores() - 1
+  cl <- makeCluster(no_cores, type="FORK")
+  nn <- parLapply(cl, sample_sizes_to_test, function(x) generate_neural_net(x))
+  stopCluster(cl)
+  return(nn)
+}
+#' @param nn the neural nets to test - they will be checked for validity (random corruption happens? lol)
+#' @return None. Output will be produced in stdout
+test_nets <- function(nn) {
+  valid_net <-  13 # if something screws up and it's invalid, toss it out ig lol
+  invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
+}
+#####################################################################
 ### MAIN
 ## normalizing data
 pokemon <- read.csv(paste0(input,"pokemon.csv"), na.strings=c("", NA))
@@ -138,15 +154,11 @@ train <- subset(training_data, split == TRUE) # but we don't run more than 8,000
 test <- subset(training_data, split == FALSE)
 
 ## parallelize neural net generation
-no_cores <- detectCores() - 1
-cl <- makeCluster(no_cores, type="FORK")
 sample_sizes_to_test <- seq(1000, 2000, by=1000)
-nn <- parLapply(cl, sample_sizes_to_test, function(x) generate_neural_net(x))
+nn <- parallel_train_nets(sample_sizes_to_test)
 
 ## test the nets. 
-valid_net <-  13 # if something screws up and it's invalid, toss it out ig lol
-invisible(sapply(nn, function(x) {if(length(x) == valid_net) test_neural_net(x)}))
-stopCluster(cl)  
+test_nets(nn)
 
 ## save results?
 # save(nn, file=paste0(output, "neural_nets.rds")) # R object version
