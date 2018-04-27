@@ -1,10 +1,8 @@
-library(ggplot2)
 library(tidyverse)
-library(dplyr)
 
-battles <- read.csv("~/Downloads/pokemon-combat/combats.csv")
-tests <- read.csv("~/Downloads/pokemon-combat/tests.csv")
-pokemon <- read.csv("~/Downloads/pokemon-combat/pokemon.csv", na.strings=c("",NA))
+battles <- read.csv("~/Projects/Pokemon/raw_data/combats.csv")
+tests <- read.csv("~/Projects/Pokemon/raw_data/tests.csv")
+pokemon <- read.csv("~/Projects/Pokemon/raw_data/pokemon.csv", na.strings=c("",NA))
 
 # set up coloring
 types <- unique(pokemon$Type.1)
@@ -22,7 +20,6 @@ poke_graph <- pokemon %>%
   mutate(Power = pmax(Attack, Sp.Atk), # you can choose your stronger stat
          Resilience = (Defense + Sp.Def)/2, # it's probably 50/50 what they'll attack with
          Value = Power + Resilience) %>%
-  mutate() %>% # refactor for coloring
   mutate(Legendary = as.logical(Legendary), # convert to real booleans
          Gen = factor(Gen), # refactor for coloring
          Type = factor(Type, levels = types, ordered = TRUE)) %>% 
@@ -46,5 +43,18 @@ ggplot(data = poke_graph %>%
   facet_wrap(~ Legendary, 
              labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
   ggtitle("Overall Value of Pokémon across generations") + 
-  labs(x="Generation", y="Overall Value (Offensive + Defenseive)")
+  labs(x="Generation", y="Overall Value (Offensive + Defensive)")
+
+ggplot(data = poke_graph %>%
+         select(c(Gen, Value, Legendary, Type)) %>%
+         group_by(Gen, Legendary) %>%
+         mutate(Type = factor(Type, levels = types, ordered = TRUE))) + 
+  geom_point(mapping = aes(Gen, Value, col=Type), position="jitter", size = 2) + 
+  facet_wrap(~ Legendary, 
+             labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
+  ggtitle("Overall Value of Pokémon across generations") + 
+  labs(x="Generation", y="Overall Value (Offensive + Defensive)") + 
+  scale_color_manual(values=colors) +
+  coord_cartesian(ylim = c(0, 300)) +
+  theme(legend.key.size = unit(0.65, "cm"))  # resize
 
