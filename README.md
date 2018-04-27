@@ -1,15 +1,24 @@
-# PokeNet
-![Visualized Result](/Visualizing/neural_net.png?raw=True)
-## Data
+# Pokémon Data Analysis
+### Data
 Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge/data)
 ## Tools
 * **R** — Easy to perform complex operations statistical operations concisely
   * **RStudio** — IDE, for ease of coding
+  * **library(tidyverse)** — conglomeration of packages for visualizing and cleaning data 
   * **library(neuralnet)** — for building the neural nets
-  * **library(dplyr)** — for data manipulation i.e. pulling apart and concisely scaling data
+  * **library(dplyr)** — for data manipulation i.e. pulling apart and concisely scaling data (included in *Tidyverse*)
   * **library(caTools)** — for partitioning data
   * **library(parallel)** — for parallelizing the process of generating neural nets with different parameterizations
-  * **library(ggplot2)** — for beautiful and easy visualization of data
+  * **library(ggplot2)** — for beautiful and easy visualization of data (included within *Tidyverse*)
+## Pre-Analysis
+Began by sprucing up the data via renaming as well as mutating some new variables, then ran some visualizations before creating neural net.  
+**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less signifcant.
+![Power vs Type](/Visualizing/pokegraph.png?raw=True)
+![Overall Value across Generations by Type](/Visualizing/poke_scatter.png?raw=True)
+![Overall Value vs Generation](/Visualizing/val_over_gen.png?raw=True)
+# PokeNet
+![Visualized Result](/Visualizing/neural_net.png?raw=True)
+
 ## Data Preparation
 After generally cleaning up the data to be properly formatted for R (e.g. turning "True" strings into TRUE booleans),
 I normalized all continuous data to Gaussian distributions. Categoricals as a whole presented a more
@@ -17,7 +26,8 @@ difficult challenge. Dealing with binary variables was easy enough — I encode
 as 1 and -1, and the dependent (the victor) as 0 and 1. I used a different encoding approach between 
 independent and dependent because [a resource](https://visualstudiomagazine.com/articles/2013/07/01/neural-network-data-normalization-and-encoding.aspx)
 indicated this was preferable. I attempted to use 1-of-(C-1) effects encoding for non-binary categorical variables,
-but after encoding them I was unable to use them as input, and thus chose to disregard them.  
+but after encoding them I found that they decreased the accuracy of the net's predictions, and thus removed them. This result is 
+is not unsurprising after the quick visualizations done in the pre-analysis.
 ## Neural Net Generation
 I used the *neuralnet* package in R, which utilizes resilient backpropagation [(Riedmiller, 1994)](http://ieeexplore.ieee.org/document/298623/).  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I arbitrarily chose to use 3 hidden layers. I put 10 nodes in each hidden layer as it was a round number that 
