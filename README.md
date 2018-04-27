@@ -1,6 +1,12 @@
 # Pokémon Data Analysis
 ### Data
 Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge/data)
+## Pre-Analysis
+Began by sprucing up the data via renaming as well as mutating some new variables, then ran some visualizations before creating neural net.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less signifcant.
+![Power vs Type](/Visualizing/pokegraph.png?raw=True)
+![Overall Value across Generations by Type](/Visualizing/poke_scatter.png?raw=True)
+![Overall Value vs Generation](/Visualizing/val_over_gen.png?raw=True)
 ## Tools
 * **R** — Easy to perform complex operations statistical operations concisely
   * **RStudio** — IDE, for ease of coding
@@ -10,15 +16,8 @@ Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge
   * **library(caTools)** — for partitioning data
   * **library(parallel)** — for parallelizing the process of generating neural nets with different parameterizations
   * **library(ggplot2)** — for beautiful and easy visualization of data (included within *Tidyverse*)
-## Pre-Analysis
-Began by sprucing up the data via renaming as well as mutating some new variables, then ran some visualizations before creating neural net.  
-**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less signifcant.
-![Power vs Type](/Visualizing/pokegraph.png?raw=True)
-![Overall Value across Generations by Type](/Visualizing/poke_scatter.png?raw=True)
-![Overall Value vs Generation](/Visualizing/val_over_gen.png?raw=True)
 # PokeNet
 ![Visualized Result](/Visualizing/neural_net.png?raw=True)
-
 ## Data Preparation
 After generally cleaning up the data to be properly formatted for R (e.g. turning "True" strings into TRUE booleans),
 I normalized all continuous data to Gaussian distributions. Categoricals as a whole presented a more
