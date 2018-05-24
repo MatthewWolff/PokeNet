@@ -3,7 +3,7 @@
 Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge/data)
 ## Pre-Analysis
 Began by sprucing up the data via renaming as well as mutating some new variables, then ran some visualizations before creating neural net.  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less signifcant.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less significant.
 ![Power vs Type](/Visualizing/pokegraph.png?raw=True)
 ![Overall Value across Generations by Type](/Visualizing/poke_scatter.png?raw=True)
 ![Overall Value vs Generation](/Visualizing/val_over_gen.png?raw=True)
