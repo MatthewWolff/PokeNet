@@ -28,13 +28,13 @@ indicated this was preferable. I attempted to use 1-of-(C-1) effects encoding fo
 but after encoding them I found that they decreased the accuracy of the net's predictions, and thus removed them. This result is 
 is not unsurprising after the quick visualizations done in the pre-analysis.
 ## Neural Net Generation
-I used the *neuralnet* package in R, which utilizes resilient backpropagation [(Riedmiller, 1994)](http://ieeexplore.ieee.org/document/298623/).  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I arbitrarily chose to use 3 hidden layers. I put 10 nodes in each hidden layer as it was a round number that 
-was slightly less than my number of input variables. As I experimented with training set size, I found that
-decreasing returns warranted limiting the input training size to ~ 5000 battles. Because this is only 1/10 of the data
-that I had at my disposal, this mean that I could extensively test my neural nets.  
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Because the ratio of my training to testing was 1:9 and yielded ~ 92% accuracy, I am confident that the degree of overfitting
-is not significant.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;I used the *neuralnet* package in R, which utilizes resilient backpropagation
+[(Riedmiller, 1994)](http://ieeexplore.ieee.org/document/298623/). I arbitrarily chose to use 3 hidden layers. I put 10 nodes
+in each hidden layer as it was a round number that was slightly less than my number of input variables. As I experimented with
+training set size, I found that decreasing returns warranted limiting the input training size to ~ 5000 battles. Because this is
+only 1/10 of the datathat I had at my disposal, this mean that I could extensively test my neural nets.  
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Because the ratio of my training to testing was 1:9 and yielded ~ 92% accuracy, I am confident
+that the degree of overfitting is not significant.
 ## Results
 ```
 Neural Net with training size of 1000 took: 1.204 seconds  
