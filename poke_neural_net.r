@@ -6,7 +6,10 @@ library(parallel)
 # Customizable Constants?
 input_dir <- "~/projects/pokemon/raw_data/"
 output_dir <- "~/projects/pokemon/" # must end with a "/"
+
+USE_TYPE <- TRUE
 type_matchup <- "type_matchup"
+
 sample_sizes_to_test <- seq(1000, 2000, by=1000)
 
 #####################################################################
@@ -56,7 +59,7 @@ determine_type_advantage <- function(type_list1, type_list2) {
   
   if (p1_attacking == p2_attacking) type_factor <- 0
   else type_factor <- if_else(p1_attacking > p2_attacking, -1, 1)
-  type_factor*pmax(p1_attacking, p2_attacking)
+  type_factor*pmax(p1_attacking, p2_attacking) %>% `names<-`(type_matchup)
 }
 
 #'@example type_chart["Fire", "Water"] -> 0.5  # not effective!
@@ -88,22 +91,35 @@ type_chart ="
 #' @param pairs accepts a list of pairs of pokemon IDs
 #' @param how_many how many of the pairs to expand 
 #' @return a large data frame containing the stats of the pair of pokemon
-make_battle <- function(pairs, how_many="ALL"){
+make_battle <- function(pairs, how_many="ALL", use_type=F){
   if(how_many == "ALL") how_many = dim(pairs)[1]
   
   battles <- 1:how_many %>% lapply(function(x){
     battle <- as.numeric(pairs[x,])
     p1 <- stripped[battle[1],] 
     p2 <- stripped[battle[2],]
-    c(p1, p2)
+    p1.type <- pn[battle[1], "Type"] %>% unlist %>% unname
+    p2.type <- pn[battle[2], "Type"] %>% unlist %>% unname
+    if(use_type) {
+      c(p1, p2, determine_type_advantage(p1.type, p2.type)) 
+    } else {
+      c(p1, p2) 
+    }
   })
+  
   pokemon_stats <- stripped
   pokemon1_cols <- paste0(names(pokemon_stats), 1)
   pokemon2_cols <- paste0(names(pokemon_stats), 2)
-  col_names <- c(pokemon1_cols, pokemon2_cols)
-  dat <- as.data.frame(matrix(unlist(battles), nrow=length(unlist(battles[1])))) %>% t
-  colnames(dat) <- col_names
-  rownames(dat) <- NULL
+  
+  if(use_type) {
+    dat <- as.data.frame(matrix(unlist(battles), nrow=length(unlist(battles[1])))) %>% t %>%
+      `colnames<-`(c(pokemon1_cols, pokemon2_cols, type_matchup)) %>% `rownames<-`(NULL)
+    dat[,type_matchup] <- scale(dat[,type_matchup]) # normalize the new column
+  } else {
+    dat <- as.data.frame(matrix(unlist(battles), nrow=length(unlist(battles[1])))) %>% t %>%
+      `colnames<-`(c(pokemon1_cols, pokemon2_cols)) %>% `rownames<-`(NULL)
+  }
+  
   dat
 }
 
@@ -128,17 +144,15 @@ check_winners <- function(how_many){
 #' @param sampling_size how many rows of the training set to use
 #' @return a neural net that has been trained with the specified sampling_size
 generate_neural_net <- function(sampling_size){
-  dat <- make_battle(train, sampling_size)
-  dat <- add_winner(dat, sampling_size)
+  dat <- train %>% make_battle(sampling_size, use_type=USE_TYPE) %>% add_winner(sampling_size)
   
   ## select features and turn into formula
-  pokemon_stats <- stripped
-  feats <- c(paste0(names(pokemon_stats), 1), paste0(names(pokemon_stats), 2))
+  feats <- names(dat[,-1]) # drop "Winner" or else it'll know who wins LOL
   f <- paste(feats, collapse=" + ") %>% paste("Winner ~", .) %>% as.formula
   
   ## run
   ptm <- proc.time()
-  nn <- neuralnet(f, dat, hidden=c(10, 10, 10), linear.output=FALSE)
+  nn <- neuralnet(f, dat, hidden=c(20, 20, 20), linear.output=FALSE)
   time_taken <- proc.time() - ptm
   
   ## Check out the neural net
@@ -153,7 +167,7 @@ generate_neural_net <- function(sampling_size){
 #' @return the size of training samples it had and the accuracy it could predict with
 test_neural_net <- function(nn){
   testing_size = dim(test)[1]
-  testing <- make_battle(test, testing_size)
+  testing <- make_battle(test, testing_size, use_type = USE_TYPE)
   # apply the neural net to some tests
   predicted <- compute(nn, testing)
   predicted$net.result <- sapply(predicted$net.result, round, digits=0)
@@ -200,7 +214,8 @@ pn <- pokemon  %>%
     Sp.Atk    = as.numeric(scale(Sp.Atk)),
     Sp.Def    = as.numeric(scale(Sp.Def)),
     Speed     = as.numeric(scale(Speed)),
-    Power     = as.numeric(scale(Power))
+    Power     = as.numeric(scale(Power)),
+    Type      = encode_type(Type1, Type2)
   ) %>%
   mutate( # convert categorical variables to numerics
     Legendary = binarize_categorical(Legendary)
@@ -213,7 +228,7 @@ training_data <-
   mutate(Winner = as.numeric(First_pokemon != Winner)) # must be numeric outcome
 
 ## pull apart data into training and testing
-stripped <- pn %>% select(-c(ID, Name, Type1, Type2, Gen))
+stripped <- pn %>% select(-c(ID, Name, Type1, Type2, Type, Gen))
 split <- training_data$Winner %>% sample.split(SplitRatio = 0.20) # only leaves 10,000 training recs
 train <- training_data %>% subset(split == TRUE) # but we don't run more than 8,000 at a time ^, so
 test  <- training_data %>% subset(split == FALSE)
