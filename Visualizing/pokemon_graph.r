@@ -7,7 +7,7 @@ pokemon <- read.csv("~/Projects/Pokemon/raw_data/pokemon.csv", na.strings=c("",N
 # set up coloring
 types <- unique(pokemon$Type.1)
 types2 <- unique(pokemon$Type.2)
-colors <- c("chartreuse4","firebrick2","deepskyblue1","chartreuse2","black","darkorchid2","yellow","salmon4","palevioletred1","tomato4","purple","saddlebrown","snow2","paleturquoise1","red","gray13","darkgray","lightslateblue")
+colors <- c("#7AC74C", "#EE8130", "#6390F0", "#A6B91A", "#A8A77A", "#A33EA1", "#F7D02C", "#E2BF65", "#D685AD", "#C22E28", "#F95587", "#B6A136", "#735797", "#96D9D6", "#6F35FC", "#705746", "#B7B7CE", "#A98FF3")
 
 ## Graphing poke-data
 poke_graph <- pokemon %>%
