@@ -30,8 +30,12 @@ ggplot(data=poke_graph, mapping = aes(Type, Power, fill=Type)) +
   facet_wrap(~ Legendary, 
              labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
   ggtitle("Comparing Offensive Ability of Pokemon by Type and Legendary Status") + 
-  labs(y="Offensive Ability") +
+  labs(y="Offensive Ability (Highest Attack Stat)") +
   scale_fill_manual(values=colors) +
+  theme(plot.title = element_text(hjust = 0.5),
+        axis.ticks.y = element_blank(),
+        axis.text.y = element_blank(),
+        axis.title.x = element_blank()) +
   guides(fill=FALSE) + # remove legend for fill
   coord_polar()
 
@@ -39,22 +43,42 @@ ggplot(data = poke_graph %>%
          select(c(Gen, Value, Legendary)) %>%
          group_by(Gen, Legendary) %>%
          summarize(Value = mean(Value))) + 
-  geom_bar(mapping = aes(Gen, Value, fill=Gen), col = "black", stat = "identity") + 
+  geom_bar(mapping = aes(Gen, Value), col = "black", stat = "identity") + 
   facet_wrap(~ Legendary, 
              labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
   ggtitle("Overall Value of Pokémon across generations") + 
   labs(x="Generation", y="Overall Value (Offensive + Defensive)")
 
-ggplot(data = poke_graph %>%
-         select(c(Gen, Value, Legendary, Type)) %>%
-         group_by(Gen, Legendary) %>%
-         mutate(Type = factor(Type, levels = types, ordered = TRUE))) + 
+poke_scatter <- ggplot(data = poke_graph %>%
+                         select(c(Gen, Value, Legendary, Type)) %>%
+                         group_by(Gen, Legendary) %>%
+                         mutate(Type = factor(Type, levels = types, ordered = TRUE))) + 
   geom_point(mapping = aes(Gen, Value, col=Type), position="jitter", size = 2) + 
   facet_wrap(~ Legendary, 
              labeller = as_labeller(c("FALSE" = "Non-Legendary", "TRUE" = "Legendary"))) +
   ggtitle("Overall Value of Pokémon across generations") + 
-  labs(x="Generation", y="Overall Value (Offensive + Defensive)") + 
+  labs(x="Generation", y="Overall Value (Highest Attack Stat + Average Defensive Stat)") + 
   scale_color_manual(values=colors) +
   coord_cartesian(ylim = c(0, 300)) +
-  theme(legend.key.size = unit(0.65, "cm"))  # resize
+  theme(legend.key.size = unit(0.65, "cm"),
+        plot.title = element_text(hjust = 0.5),
+        axis.line = element_line(colour = "black"))
+
+# markers <- poke_graph %>%
+#   select(c(Gen, Value, Legendary, Type)) %>%
+#   group_by(Gen, Legendary) %>%
+#   summarize(Median = median(Value))
+#
+# for (i in 1:length(means$Gen)) {
+#   poke_scatter <- poke_scatter +
+#     geom_segment(aes(x=x, y=y ,yend=yend ,xend=xend),
+#                  inherit.aes=FALSE,
+#                  data=data.frame(x=as.numeric(markers$Gen[i]) - 0.3,
+#                                  xend=as.numeric(markers$Gen[i]) + 0.3,
+#                                  y=markers$Median[i],
+#                                  yend=markers$Median[i],
+#                                  Legendary=markers$Legendary[i]),
+#                  size=1)
+# }
+poke_scatter
 
