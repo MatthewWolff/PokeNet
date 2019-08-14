@@ -1,6 +1,6 @@
 # Pokémon Data Analysis
 ### Data
-Taken from the [Pokémon Challenge on Kaggle](le.com/terminus7/pokemon-challenge/data)
+Taken from the [Pokémon Challenge on Kaggle](https://kaggle.com/terminus7/pokemon-challenge/data)
 ## Pre-Analysis
 Began by sprucing up the data via renaming as well as mutating some new variables, then ran some visualizations before creating neural net.  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;**Take away**: Of the categoricals, *Legendary* appears to be closely linked with strength, whereas the relationship between strength and *type* or *generation* appears to be less significant.
